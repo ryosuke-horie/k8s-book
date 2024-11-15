@@ -7,6 +7,6 @@ metadata:
 spec:
   containers:
     - name: hello-server
-      image: blux/hello-server:1.0
+      image: blux2/hello-server:1.0
       ports:
         - containerPort: 8080
