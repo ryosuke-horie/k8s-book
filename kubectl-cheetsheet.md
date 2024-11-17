@@ -198,6 +198,7 @@ Deployment名は`nginx-deployment`が相当する。
     2. 別ターミナルを開いて`kubectl get pod --watch --namespace default`
     3. `kubectl apply --filename deployment-recreate.yml --namespace default` ('nginxのimageを1.25.0に設定しておく)
     4. 1.24.0のPodが削除され、1.25.0のPodが作成される
+  - 一気にPodを更新するため、一時的にサービスが停止するが更新は早い
 
 ``` bash
 $ kubectl get pod --watch --namespace default
