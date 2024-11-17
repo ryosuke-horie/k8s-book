@@ -4,3 +4,28 @@ metadata:
   name: nginx-deployment
   labels:
     app: nginx
+spec:
+  replicas: 10
+  strategy:
+    type: RollingUpdate # ローリングアップデート ... 1つずつPodを新しいものに置き換える
+    rollingUpdate:
+      maxUnavailable: 25% # 25%のPodが利用不可になることを許容
+      maxSurge: 100% # 100%のPodが増加することを許容
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          # image: nginx:1.24.0
+          image: nginx:1.25.3
+          ports:
+            - containerPort: 80
+          lifecycle: # recreate版に追加された設定
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "sleep 10"]

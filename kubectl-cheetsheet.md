@@ -294,3 +294,138 @@ $ kubectl get pod --watch --namespace default
 # nginx-deployment-5d694b9887-pxxgs   1/1     Running             0          0s
 # nginx-deployment-5d694b9887-w55r8   1/1     Running             0          0s
 ```
+
+- `RollingUpdate` : 古いPodを削除しながら新しいPodを作成する
+  - 参考ファイルは`deployment-rollingupdate.yml`
+  - 以下の操作で実験する
+    1. `kubectl apply --filename deployment-rollingupdate.yml --namespace default` ('nginxのimageを1.24.0に設定しておく)
+    2. 別ターミナルを開いて`kubectl get pod --watch --namespace default`
+    3. `kubectl apply --filename deployment-rollingupdate.yml --namespace default` ('nginxのimageを1.25.0に設定しておく)
+    4. 1.24.0のPodが削除され、1.25.0のPodが作成される
+  - 一時的にサービスが停止することなく更新が行われる
+  - 途中でPodの数が倍になる(maxSurge: 100%)の設定のため
+
+``` bash
+kubectl get pod --watch --namespace default
+# NAME                               READY   STATUS    RESTARTS   AGE
+# nginx-deployment-fb7c9b74d-6x728   0/1     Pending   0          0s
+# nginx-deployment-fb7c9b74d-6x728   0/1     Pending   0          0s
+# nginx-deployment-fb7c9b74d-l6fjs   0/1     Pending   0          0s
+# nginx-deployment-fb7c9b74d-7phwq   0/1     Pending   0          0s
+# nginx-deployment-fb7c9b74d-5hhnx   0/1     Pending   0          0s
+# nginx-deployment-fb7c9b74d-xvb68   0/1     Pending   0          0s
+# nginx-deployment-fb7c9b74d-7phwq   0/1     Pending   0          0s
+# nginx-deployment-fb7c9b74d-l6fjs   0/1     Pending   0          0s
+# nginx-deployment-fb7c9b74d-t9642   0/1     Pending   0          0s
+# nginx-deployment-fb7c9b74d-6x728   0/1     ContainerCreating   0          0s
+# nginx-deployment-fb7c9b74d-gc6rq   0/1     Pending             0          0s
+# nginx-deployment-fb7c9b74d-ttbzg   0/1     Pending             0          0s
+# nginx-deployment-fb7c9b74d-xvb68   0/1     Pending             0          0s
+# nginx-deployment-fb7c9b74d-7bcw8   0/1     Pending             0          0s
+# nginx-deployment-fb7c9b74d-5hhnx   0/1     Pending             0          0s
+# nginx-deployment-fb7c9b74d-mj7t9   0/1     Pending             0          0s
+# nginx-deployment-fb7c9b74d-gc6rq   0/1     Pending             0          0s
+# nginx-deployment-fb7c9b74d-t9642   0/1     Pending             0          0s
+# nginx-deployment-fb7c9b74d-7phwq   0/1     ContainerCreating   0          0s
+# nginx-deployment-fb7c9b74d-mj7t9   0/1     Pending             0          0s
+# nginx-deployment-fb7c9b74d-ttbzg   0/1     Pending             0          0s
+# nginx-deployment-fb7c9b74d-7bcw8   0/1     Pending             0          0s
+# nginx-deployment-fb7c9b74d-l6fjs   0/1     ContainerCreating   0          0s
+# nginx-deployment-fb7c9b74d-7bcw8   0/1     ContainerCreating   0          0s
+# nginx-deployment-fb7c9b74d-xvb68   0/1     ContainerCreating   0          0s
+# nginx-deployment-fb7c9b74d-5hhnx   0/1     ContainerCreating   0          0s
+# nginx-deployment-fb7c9b74d-mj7t9   0/1     ContainerCreating   0          0s
+# nginx-deployment-fb7c9b74d-t9642   0/1     ContainerCreating   0          0s
+# nginx-deployment-fb7c9b74d-gc6rq   0/1     ContainerCreating   0          0s
+# nginx-deployment-fb7c9b74d-ttbzg   0/1     ContainerCreating   0          0s
+# nginx-deployment-fb7c9b74d-ttbzg   1/1     Running             0          0s
+# nginx-deployment-fb7c9b74d-7bcw8   1/1     Running             0          0s
+# nginx-deployment-fb7c9b74d-xvb68   1/1     Running             0          0s
+# nginx-deployment-fb7c9b74d-7phwq   1/1     Running             0          0s
+# nginx-deployment-fb7c9b74d-5hhnx   1/1     Running             0          0s
+# nginx-deployment-fb7c9b74d-mj7t9   1/1     Running             0          0s
+# nginx-deployment-fb7c9b74d-t9642   1/1     Running             0          0s
+# nginx-deployment-fb7c9b74d-6x728   1/1     Running             0          0s
+# nginx-deployment-fb7c9b74d-gc6rq   1/1     Running             0          0s
+# nginx-deployment-fb7c9b74d-l6fjs   1/1     Running             0          0s
+# nginx-deployment-849fbfc6db-49tl8   0/1     Pending             0          0s
+# nginx-deployment-849fbfc6db-49tl8   0/1     Pending             0          0s
+# nginx-deployment-849fbfc6db-mfdk7   0/1     Pending             0          0s
+# nginx-deployment-849fbfc6db-bdcz8   0/1     Pending             0          0s
+# nginx-deployment-849fbfc6db-sh4hk   0/1     Pending             0          0s
+# nginx-deployment-849fbfc6db-kbtlh   0/1     Pending             0          0s
+# nginx-deployment-849fbfc6db-krvk5   0/1     Pending             0          0s
+# nginx-deployment-849fbfc6db-jhr62   0/1     Pending             0          0s
+# nginx-deployment-849fbfc6db-mfdk7   0/1     Pending             0          0s
+# nginx-deployment-849fbfc6db-bdcz8   0/1     Pending             0          0s
+# nginx-deployment-fb7c9b74d-ttbzg    1/1     Terminating         0          24s
+# nginx-deployment-849fbfc6db-rlcml   0/1     Pending             0          0s
+# nginx-deployment-849fbfc6db-7lsfs   0/1     Pending             0          0s
+# nginx-deployment-849fbfc6db-fvzz2   0/1     Pending             0          0s
+# nginx-deployment-849fbfc6db-kbtlh   0/1     Pending             0          0s
+# nginx-deployment-849fbfc6db-krvk5   0/1     Pending             0          0s
+# nginx-deployment-849fbfc6db-jhr62   0/1     Pending             0          0s
+# nginx-deployment-849fbfc6db-sh4hk   0/1     Pending             0          0s
+# nginx-deployment-fb7c9b74d-l6fjs    1/1     Terminating         0          24s
+# nginx-deployment-849fbfc6db-49tl8   0/1     ContainerCreating   0          0s
+# nginx-deployment-849fbfc6db-rlcml   0/1     Pending             0          0s
+# nginx-deployment-849fbfc6db-7lsfs   0/1     Pending             0          0s
+# nginx-deployment-849fbfc6db-fvzz2   0/1     Pending             0          0s
+# nginx-deployment-849fbfc6db-mfdk7   0/1     ContainerCreating   0          0s
+# nginx-deployment-849fbfc6db-kbtlh   0/1     ContainerCreating   0          0s
+# nginx-deployment-849fbfc6db-krvk5   0/1     ContainerCreating   0          0s
+# nginx-deployment-849fbfc6db-bdcz8   0/1     ContainerCreating   0          0s
+# nginx-deployment-849fbfc6db-sh4hk   0/1     ContainerCreating   0          0s
+# nginx-deployment-849fbfc6db-jhr62   0/1     ContainerCreating   0          0s
+# nginx-deployment-849fbfc6db-fvzz2   0/1     ContainerCreating   0          0s
+# nginx-deployment-849fbfc6db-rlcml   0/1     ContainerCreating   0          0s
+# nginx-deployment-849fbfc6db-7lsfs   0/1     ContainerCreating   0          0s
+# nginx-deployment-849fbfc6db-rlcml   1/1     Running             0          0s
+# nginx-deployment-849fbfc6db-krvk5   1/1     Running             0          0s
+# nginx-deployment-849fbfc6db-49tl8   1/1     Running             0          0s
+# nginx-deployment-fb7c9b74d-6x728    1/1     Terminating         0          24s
+# nginx-deployment-849fbfc6db-bdcz8   1/1     Running             0          0s
+# nginx-deployment-849fbfc6db-sh4hk   1/1     Running             0          0s
+# nginx-deployment-fb7c9b74d-7phwq    1/1     Terminating         0          24s
+# nginx-deployment-fb7c9b74d-5hhnx    1/1     Terminating         0          24s
+# nginx-deployment-849fbfc6db-jhr62   1/1     Running             0          0s
+# nginx-deployment-849fbfc6db-fvzz2   1/1     Running             0          0s
+# nginx-deployment-849fbfc6db-mfdk7   1/1     Running             0          0s
+# nginx-deployment-849fbfc6db-kbtlh   1/1     Running             0          0s
+# nginx-deployment-849fbfc6db-7lsfs   1/1     Running             0          0s
+# nginx-deployment-fb7c9b74d-xvb68    1/1     Terminating         0          25s
+# nginx-deployment-fb7c9b74d-7bcw8    1/1     Terminating         0          25s
+# nginx-deployment-fb7c9b74d-t9642    1/1     Terminating         0          25s
+# nginx-deployment-fb7c9b74d-mj7t9    1/1     Terminating         0          25s
+# nginx-deployment-fb7c9b74d-gc6rq    1/1     Terminating         0          25s
+# nginx-deployment-fb7c9b74d-ttbzg    0/1     Completed           0          34s
+# nginx-deployment-fb7c9b74d-l6fjs    0/1     Completed           0          34s
+# nginx-deployment-fb7c9b74d-ttbzg    0/1     Completed           0          34s
+# nginx-deployment-fb7c9b74d-ttbzg    0/1     Completed           0          34s
+# nginx-deployment-fb7c9b74d-l6fjs    0/1     Completed           0          34s
+# nginx-deployment-fb7c9b74d-l6fjs    0/1     Completed           0          34s
+# nginx-deployment-fb7c9b74d-6x728    0/1     Completed           0          35s
+# nginx-deployment-fb7c9b74d-5hhnx    0/1     Completed           0          35s
+# nginx-deployment-fb7c9b74d-7phwq    0/1     Completed           0          35s
+# nginx-deployment-fb7c9b74d-xvb68    0/1     Completed           0          35s
+# nginx-deployment-fb7c9b74d-7bcw8    0/1     Completed           0          35s
+# nginx-deployment-fb7c9b74d-t9642    0/1     Completed           0          35s
+# nginx-deployment-fb7c9b74d-mj7t9    0/1     Completed           0          35s
+# nginx-deployment-fb7c9b74d-gc6rq    0/1     Completed           0          35s
+# nginx-deployment-fb7c9b74d-7phwq    0/1     Completed           0          35s
+# nginx-deployment-fb7c9b74d-7phwq    0/1     Completed           0          35s
+# nginx-deployment-fb7c9b74d-7bcw8    0/1     Completed           0          35s
+# nginx-deployment-fb7c9b74d-7bcw8    0/1     Completed           0          35s
+# nginx-deployment-fb7c9b74d-xvb68    0/1     Completed           0          35s
+# nginx-deployment-fb7c9b74d-xvb68    0/1     Completed           0          35s
+# nginx-deployment-fb7c9b74d-mj7t9    0/1     Completed           0          35s
+# nginx-deployment-fb7c9b74d-mj7t9    0/1     Completed           0          35s
+# nginx-deployment-fb7c9b74d-5hhnx    0/1     Completed           0          35s
+# nginx-deployment-fb7c9b74d-5hhnx    0/1     Completed           0          35s
+# nginx-deployment-fb7c9b74d-6x728    0/1     Completed           0          35s
+# nginx-deployment-fb7c9b74d-6x728    0/1     Completed           0          35s
+# nginx-deployment-fb7c9b74d-t9642    0/1     Completed           0          35s
+# nginx-deployment-fb7c9b74d-t9642    0/1     Completed           0          35s
+# nginx-deployment-fb7c9b74d-gc6rq    0/1     Completed           0          36s
+# nginx-deployment-fb7c9b74d-gc6rq    0/1     Completed           0          36s
+```
