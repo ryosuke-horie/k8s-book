@@ -143,3 +143,20 @@ source ~/.bashrc
 echo 'alias k=kubectl' >>~/.bashrc
 source ~/.bashrc
 ```
+
+## ReplicaSet
+
+Podを複数起動するためのリソース
+
+`kubectl apply --filename <マニフェストファイル> --namespace default`
+
+確認：`kubectl get pod --namespace default`
+
+ReplicaSetのリソースを直接参照する。: `kubectl get replicaset --namespace default`
+
+```text
+NAME         DESIRED   CURRENT   READY   AGE
+httpserver   3         3         3       2m16s
+```
+
+削除：`kubectl delete replicaset <ReplicaSet名> --namespace default`
