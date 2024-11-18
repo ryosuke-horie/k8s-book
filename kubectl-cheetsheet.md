@@ -4,6 +4,10 @@
 
 `kind create cluster`
 
+## k8sクラスタ削除
+
+`kind delete cluster`
+
 ## クラスタ接続確認
 
 `kubectl cluster-info --context kind-kind`
@@ -429,3 +433,31 @@ kubectl get pod --watch --namespace default
 # nginx-deployment-fb7c9b74d-gc6rq    0/1     Completed           0          36s
 # nginx-deployment-fb7c9b74d-gc6rq    0/1     Completed           0          36s
 ```
+
+## Service
+
+### Serviceのデプロイ
+
+Deploymentと同じようにマニフェストファイルを指定してapplyする。
+先にSelecltorとPodのラベルを合わせてDeploymentを作成しておく。
+
+`kubectl apply --filename <マニフェストファイル> --namespace default`
+
+### Serviceの確認
+
+`kubectl get service <サービス名> --namespace default`
+
+### ServiceにPort Forwardしてアクセスする
+
+別ターミナルでPort Forwardを実行する。：
+`kubectl port-forward svc/<サービス名> 8080:8080 --namespace default`
+
+アクセスする：
+`curl http://localhost:8080`
+
+### Serviceの種類
+
+- ClusterIP : クラスタ内からのみアクセス可能。Ingressを利用して外部からアクセスする。デフォルトはこれ
+- NodePort : クラスタ外からアクセス可能。NodeのIPアドレスの任意のポートでアクセス可能
+- LoadBalancer : 外部ロードバランサを利用して外部IPを割り当てる。別で用意する必要がある。
+- ExternalName ： ServiceをexternalNameフィールドの内容にマッピングする。DNSサーバが外部ホストの値を持つCNAMEレコードを返すように設定される。
